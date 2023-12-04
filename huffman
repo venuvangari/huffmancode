@@ -1,0 +1,73 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <map>
+
+using namespace std;
+
+struct HuffmanNode {
+    char data;
+    int frequency;
+    HuffmanNode* left;
+    HuffmanNode* right;
+
+    HuffmanNode(char d, int freq) : data(d), frequency(freq), left(nullptr), right(nullptr) {}
+};
+
+struct CompareNodes {
+    bool operator()(HuffmanNode* a, HuffmanNode* b) {
+        return a->frequency > b->frequency;
+    }
+};
+
+HuffmanNode* buildHuffmanTree(string characters, vector<int>& frequencies) {
+    priority_queue<HuffmanNode*, vector<HuffmanNode*>, CompareNodes> minHeap;
+
+    for (int i = 0; i < characters.length(); ++i) {
+        HuffmanNode* node = new HuffmanNode(characters[i], frequencies[i]);
+        minHeap.push(node);
+    }
+
+    while (minHeap.size() > 1) {
+        HuffmanNode* left = minHeap.top();
+        minHeap.pop();
+
+        HuffmanNode* right = minHeap.top();
+        minHeap.pop();
+
+        HuffmanNode* internalNode = new HuffmanNode('$', left->frequency + right->frequency);
+        internalNode->left = left;
+        internalNode->right = right;
+
+        minHeap.push(internalNode);
+    }
+
+    return minHeap.top();
+}
+
+void printHuffmanCodes(HuffmanNode* root, string code, map<char, string>& huffmanCodes) {
+    if (root == nullptr) {
+        return;
+    }
+
+    if (root->data != '$') {
+        cout << "  " << root->data << " : " << code << endl;
+        huffmanCodes[root->data] = code;
+    }
+
+    printHuffmanCodes(root->left, code + "0", huffmanCodes);
+    printHuffmanCodes(root->right, code + "1", huffmanCodes);
+}
+
+int main() {
+    string S = "abcdef";
+    vector<int> f = {5, 9, 12, 13, 16, 45};
+
+    HuffmanNode* root = buildHuffmanTree(S, f);
+
+    map<char, string> huffmanCodes;
+    cout << "Huffman codes are:" << endl;
+    printHuffmanCodes(root, "", huffmanCodes);
+
+    return 0;
+}
